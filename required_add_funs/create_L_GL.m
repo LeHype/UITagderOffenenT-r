@@ -1,0 +1,9 @@
+function L_GL = create_L_GL(L_Cfun,n,m,n_w_L)
+    import casadi.*
+    create_MatlabCasadi_sym('Casadi',{sprintf('x_ki %d 1',n),sprintf('dx_ki %d 1',n),...
+                                      sprintf('u_ki %d 1',m),sprintf('du_k %d 1',m),...
+                                      sprintf('w_L %d 1',n_w_L),...
+                                      't','h'},'caller')
+    L_GL_ = L_Cfun(t,x_ki+h*t*dx_ki,u_ki+h*t*du_k,w_L); 
+    L_GL  = Function('L_GL',{t,h,x_ki,dx_ki,u_ki,du_k,w_L},{L_GL_});
+end
