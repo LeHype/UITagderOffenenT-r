@@ -12,9 +12,10 @@ v.FrameRate = video_speed*fps;
 open(v);
 writeVideo(v,frames);
 close(v);
+disp('------------------------------')
  disp(['Danke für deine Teilnahme ',name]);
  disp('Drücke auf Reset um von Vorne zu beginnen')
-
+disp('------------------------------')
  movie(frames,1,round(video_speed*fps));
 
 end

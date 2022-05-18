@@ -4,7 +4,7 @@ echo off
 load("Workspace.mat");
 addpath('.\required_add_funs');
 
-disp('inizialisiere Optimizer');
+disp('initialisiere Optimizer');
 %SECOND Summary of this function goes here
 %   Detailed explanation goes here
 %% SetupII, SingleShootIntEval & BuildOCP 
@@ -44,10 +44,14 @@ if sim_CT==1
 end
 
 if SolveOCP_WS.solver.stats.success;
-disp('Optimieren erfolgreich');
-
+disp('------------------------------')
+    disp('Optimieren erfolgreich');
+disp('------------------------------')
 else 
-disp('Optimieren Fehlgeschlagen! ')
+    warning('on','all');
+    warning('Optimieren Fehlgeschlagen! ')
+    warning('off','all');
+% disp('Optimieren Fehlgeschlagen! ')
 disp('Dies kann merere Gründe haben.')
 disp('  1. Der gezeichnete Pfad physikalisch ist nicht fahrbar.')
 disp('     Habt ihr eventuell zu steile Kurven eingebaut? Und denkt ihr')
@@ -61,7 +65,9 @@ disp('     ausgewählt habt ist dies wahrscheinlich der Grund.')
 disp('  4. Falls ihr euch immernoch nicht sicher seit was fehlgeschlagen ist')
 disp('     fragt gerne eine Person vom Lehrstuhl.')
 end
+disp('------------------------------')
 disp('Video der Fahrt wird nun gerendert')
+disp('------------------------------')
 %% trajectory plots
 if trajectory_plots_on==1
     left_color  = [0 0 1];  %red
@@ -197,7 +203,7 @@ if animation_plots_on==1
         plot(tgrid_x_CT_int,u_CT(tgrid_x_CT_int),'LineWidth',2)
         set_limits_perc(u_CT(tgrid_x_CT_int),[8,8]);
 %         leg_121 = legend('$a$','$\omega$','Location','east');
-        leg_121 = legend('Beschleunigung','Lenkwinkelgeschw.','Location','southeast','Fontsize',fontsize-5);
+        leg_121 = legend('Beschleunigung','Lenkwinkelgeschw.','Location','southeast');
         setLegColorAlpha(leg_121,[1 1 1],0.7)
     p(1,2,2,1).select();
         hold on
@@ -214,7 +220,7 @@ if animation_plots_on==1
     scalefps=true;
     if (scalefps)
      if (t_f_opt>7);
-    frameskips = round(1000+((t_f_opt-7)/5)*3000)
+    frameskips = round(1000+((t_f_opt-7)/5)*3000);
 
     video_speed = t_f_opt/((length(tgrid_x_CT_int)/frameskips)+1);
      end
@@ -311,8 +317,8 @@ if animation_plots_on==1
         close(fig_capture_frames)
     end
 
-    name_person = 'Markus';
-    video_title = [sprintf('%0.5fs',t_f_opt),'_',name_person,'_at_',datestr(now,'hhMM')];
+     name_person = 'Markus';
+     video_title = [sprintf('%0.5fs',t_f_opt),'_',name_person,'_at_',datestr(now,'hhMM')];
     if PathFollowing==1
         video_title = [video_title,'_PF'];
     end
