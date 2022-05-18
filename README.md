@@ -9,4 +9,4 @@ Zum laufen lassen muss
     3. Commandozeile in die Untere linke ecke ziehen. 
        Eventuell muss man einmal alles durchlaufen lassen um die richtige größe zu finden. 
     4. Die UI.mlapp file laufen lassen.
-    Setup.png?raw=true "Title"
+    ![plot](Setup.png?raw=true "Title")
