@@ -229,7 +229,7 @@ if animation_plots_on==1
 
     t_anim_0 = datevec(datetime('now'));
     f = waitbar(0,'Rendering Video');
-    f.Position= [900.2500 624 547.5000 90.5000];
+%     f.Position= [900.2500 624 547.5000 90.5000];
     for jj=1:length(frame_numbers)
         waitbar(jj/length(frame_numbers),f,'Rendering Video');
         ii = frame_numbers(jj);
@@ -337,7 +337,7 @@ if animation_plots_on==1
 end
 
 close(f);
-save('Workspace.mat','fig_height','fig_width','fig_pos','frames','video_speed','fps','screen');
+save('Workspace.mat','fig_height','fig_width','fig_pos','frames','video_speed','fps','screen','t_f_opt');
 
 clear all
 close all
