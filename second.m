@@ -209,7 +209,7 @@ if animation_plots_on==1
         hold on
         plot(tgrid_x_CT_int,x_traj_CT_int(3:end,:),'LineWidth',2)
         set_limits_perc(x_traj_CT_int(3:end,:),[8,8]);
-        leg_122 = legend('Geschwindigkeit','Fahrzeugwinkel (rad)','Radwinkel (rad)','Location','east','Fontsize',fontsize-5);
+        leg_122 = legend('Geschwindigkeit','Fahrzeugwinkel (rad)','Radwinkel (rad)','Location','east');
         setLegColorAlpha(leg_122,[1 1 1],0.7)
 %         [car,car_colors,indiv_part,circles,body_center] = create_car_object;
     clearvars alpha frames frames_opt
