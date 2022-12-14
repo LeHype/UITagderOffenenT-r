@@ -34,7 +34,7 @@ import casadi.*
 screen = 2;
 fig_height = 100;
 fig_width  = 60;
-fig_pos    = 'middle-left';
+fig_pos    = 'middle-right';
 
 fontsize = 18;
 SetDefaultProperties("Fontsize",fontsize)
