@@ -1,9 +1,6 @@
 # UITagderOffenenT-r
 
 Haupt Code wurde von Markus erstellt.\
-Possible Bug! If you have a Bug relating to a 'MEX' file please try deleting the 'casadiMEX.mexw64'\
-file from the required functions folder. This Bug seems to be OS/Version dependant so i cant push \
-the change. 
 
 Zum laufen lassen muss \
     1.UI.mlapp file mit Matlab öffnen. \
