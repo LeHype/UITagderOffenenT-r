@@ -4,7 +4,7 @@ A = butcher.A;
 c = butcher.c;
 s = length(c);
 
-stages_rhs_mat = 0*repmat(x,1,s);
+stages_rhs_mat = 0*casadi.SX.sym('stages_rhs_mat',rhs.size1_out(0),s);
 
 for ii=1:s
     stage_sum_i = 0*x;

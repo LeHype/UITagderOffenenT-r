@@ -5,7 +5,7 @@ function WS_struct = B_SetupI(rhs,n,m,parametrize_OP,PathFollowing,QuantsOCP)
             n
             m
             parametrize_OP
-            PathFollowing
+            PathFollowing = 0
         % optional 
             % cost functional             
                 QuantsOCP.L   = @(t,x,u,w_L)   w_L(1)*x'*eye(n)*x + w_L(2)*u'*eye(m)*u;
@@ -41,6 +41,16 @@ function WS_struct = B_SetupI(rhs,n,m,parametrize_OP,PathFollowing,QuantsOCP)
                     QuantsOCP.x_path_constr = []; %Casadi Function of x_k
                     QuantsOCP.x_path_constr_lb = [];
                     QuantsOCP.x_path_constr_ub = [];
+                % object avoidance
+                    QuantsOCP.OA_constr    = []; %Casadi Function of x_k,OA_var 
+                    QuantsOCP.OA_var_dim   = [];
+                    QuantsOCP.OA_N_obj     = [];
+                    % bound var
+                        QuantsOCP.lb_OA_var    = [];
+                        QuantsOCP.ub_OA_var    = [];
+                    % bounds constraint
+                        QuantsOCP.lb_OA_constr = []; %Casadi Function of x_k,OA_var 
+                        QuantsOCP.ub_OA_constr = []; %Casadi Function of x_k,OA_var 
             % u                                                
                 % general bounds
                     QuantsOCP.lb_u (:,1) double = -Inf*ones(m,1);
@@ -92,6 +102,7 @@ function WS_struct = B_SetupI(rhs,n,m,parametrize_OP,PathFollowing,QuantsOCP)
     create_MatlabCasadi_sym('Matlab',{'t',sprintf('x %d 1',n),sprintf('u %d 1',m), ...
         sprintf('w_L %d 1',n_w_L),sprintf('w_Phi %d 1',n_w_Phi)},'caller')
 
+    t_f_guess = T;
     
     %% dynamics and cost functionl                      
     rhs_ = rhs(t,x,u);

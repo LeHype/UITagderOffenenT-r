@@ -11,7 +11,7 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
     %% init
     % Start with an empty NLP
         J_L = 0;
-        structStructureFieldnames = {'U','X','X_interm','X_path','dU','STAGES','h_vec','Theta','V'};
+        structStructureFieldnames = {'U','X','X_interm','X_path','dU','STAGES','h_vec','Theta','V','OA'};
         var_name_cell = {'w','w_0','lb_w','ub_w','g','lb_g','ub_g'};        
         % create struct "structStructure" with fields "structStructureFieldnames" that are empty
             help = repmat({[]},size(structStructureFieldnames));
@@ -31,6 +31,10 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
         if PathFollowing==1
             Theta_0 = SX.sym('Theta_0', n_p);
             V_0     = SX.sym('V_0', m_p*M);
+        end
+    % obstacle avoidance
+        if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+            OA_var_0 = SX.sym('OA_var_0', OA_N_obj*OA_var_dim);
         end
     % parameter vector
         % w_J
@@ -96,6 +100,18 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
 
             J_path = norm(xy_corridor(Theta_0)-X_0([1,2]));
         end
+    % obstacle avoidance 
+        if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+            w.OA    = [w.OA,    OA_var_0];
+            lb_w.OA = [lb_w.OA, repmat(lb_OA_var,OA_N_obj,1)];
+            ub_w.OA = [ub_w.OA, repmat(ub_OA_var,OA_N_obj,1)];
+            w_0.OA  = [w_0.OA,  repmat(lb_OA_var + (ub_OA_var-ub_OA_var)/2,OA_N_obj,1)];
+
+            g.OA    = [g.OA,    OA_constr(X_0,OA_var_0)];
+            lb_g.OA = [lb_g.OA, lb_OA_constr];
+            ub_g.OA = [ub_g.OA, ub_OA_constr];
+        end
+
    
 
     %% +++ for loop: U, X (and STAGES) +++
@@ -110,6 +126,9 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
                 Theta_k = Theta_kp1_right;
                 V_k     = V_kp1;
             end
+            if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+                OA_var_k = OA_var_kp1;
+            end
         else
             X_k   = X_0;
             U_km1 = U_first_left; % --> U_first_left-U_first_right = U_first_left-U_{0,1} != 0 
@@ -121,6 +140,9 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
             if PathFollowing==1
                 Theta_k = Theta_0;
                 V_k     = V_0;
+            end
+            if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+                OA_var_k = OA_var_0;
             end
         end
 
@@ -155,11 +177,14 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
                     end
             end
         % PATH FOLLOWING
-        if PathFollowing==1
-            Theta_kp1_right = SX.sym(['Theta_' num2str(k+1)], n_p);
-            V_kp1 = SX.sym(['V_' num2str(k+1)], m_p*M);
-        end
-
+            if PathFollowing==1
+                Theta_kp1_right = SX.sym(['Theta_' num2str(k+1)], n_p);
+                V_kp1 = SX.sym(['V_' num2str(k+1)], m_p*M);
+            end
+        % obstacle avoidance 
+            if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+                OA_var_kp1 = SX.sym(['OA_var_' num2str(k+1)], OA_N_obj*OA_var_dim);
+            end
 
 
         %% Integrate till the end of the interval
@@ -262,6 +287,20 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
                 w.V    = [w.V, V_k];
                 lb_w.V = [lb_w.V, repmat(lb_v,M,1)];
                 ub_w.V = [ub_w.V, repmat(ub_v,M,1)];
+            end
+
+            %% obstacle avoidance
+            if k>0
+                if ~isempty(OA_constr) && ~isempty(OA_var_dim)
+                    w.OA    = [w.OA,    OA_var_kp1];
+                    lb_w.OA = [lb_w.OA, repmat(lb_OA_var,OA_N_obj,1)];
+                    ub_w.OA = [ub_w.OA, repmat(ub_OA_var,OA_N_obj,1)];
+                    w_0.OA  = [w_0.OA,  repmat(lb_OA_var + (ub_OA_var-ub_OA_var)/2,OA_N_obj,1)];
+    
+                    g.OA    = [g.OA,    OA_constr(X_k,OA_var_kp1)];
+                    lb_g.OA = [lb_g.OA, lb_OA_constr];
+                    ub_g.OA = [ub_g.OA, ub_OA_constr];
+                end
             end
 
 
@@ -452,6 +491,7 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
     n_con_dU     = numel(g.dU);
     n_con_STAGES = numel(g.STAGES);
     for ii=1:length(var_name_cell)
+%         var_name_cell{ii}
         evalc(['cur_var = ',var_name_cell{ii},';']);
         if vars_as_block == 1 %--> w = [U,X,STAGES]'
             for mm=1:length(structStructureFieldnames)
@@ -475,6 +515,10 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
                     cur_field = structStructureFieldnames{mm};
                     try
                         cur_var_help = [cur_var_help; cur_var.(cur_field)(:,ll)];
+                    catch
+                        if strcmp(cur_field,'OA')==1
+                            hi=1;
+                        end
                     end
                 end
             end

@@ -35,12 +35,17 @@ function PrintFig(filename,options)
     %% move the file to Directory
     if ~isempty(Directory)
         if isfolder(Directory)==1
-            [status,msg] = movefile(FilenameFormat,Directory,'f');  
-            if status==0
-                warning(['Moving the file was not succesful: ',msg])
-            end
+%             [status,msg] = movefile(FilenameFormat,Directory,'f');  
+%             if status==0
+%                 warning(['Moving the file was not succesful: ',msg])
+%             end
         elseif isfolder(Directory)==0
-            warning('Moving the file was not succesful: Folder does not exist.')
+%             warning('Moving the file was not succesful: Folder does not exist.')
+            mkdir(Directory)
+        end
+        [status,msg] = movefile(FilenameFormat,Directory,'f');  
+        if status==0
+            warning(['Moving the file was not succesful: ',msg])
         end
     else
         % keep file in current directory

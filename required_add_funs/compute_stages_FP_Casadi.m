@@ -6,7 +6,7 @@ import casadi.*
 %% Butcher
 b = butcher.b;
 c = butcher.c;
-s = length(c);
+s = butcher.s;
 
 
 %% prepare sym. variables for stages

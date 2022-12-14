@@ -3,15 +3,16 @@ function SetDefaultProperties(options)
         % mandatory
             % nothing
         % optional 
-            options.Fontsize         = 12;
+            options.Fontsize         = 15;
+            options.Linewidth        = 0.5; %default
             options.Interpreter      {mustBeMember(options.Interpreter,{'tex','latex','none'})} = 'latex'
             options.FactorySettings  {mustBeMember(options.FactorySettings,[0,1])} = 0
     end
     struct2CallerWS(options)
     
-    zero_objects  = repmat({0},1,6);
     groot_objects = repmat({groot},1,3);
-    objects  = {groot_objects{:},zero_objects{:}};
+    zero_objects  = repmat({0},1,7);
+    objects  = [groot_objects,zero_objects];
     NV_pairs = {'AxesTitleFontSizeMultiplier', 1;
                 'AxesLabelFontSizeMultiplier', 1;
                 'AxesTickLabelInterpreter',    Interpreter; 
@@ -19,6 +20,8 @@ function SetDefaultProperties(options)
                 'LegendInterpreter',           Interpreter;
                 'AxesFontSize',                Fontsize;
                 'LegendFontSize',              Fontsize;
+%                 'AxesLineWidth',               Linewidth;
+                'LineLineWidth',               Linewidth;
                 'LegendFontSizeMode',          'auto';%'manual';
                 'LegendAutoUpdate',            'off'};
  

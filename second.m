@@ -16,16 +16,15 @@ BuildOCP_WS           = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS
 
 
 %% SolveAndPostProcessOCP
-try 
-     BuildOCP_WS.w_0 = full(SolveOCP_WS.sol.x);
- catch
-     warning('not successful')
- end
-echo on
+% try 
+%     BuildOCP_WS.w_0 = full(SolveOCP_WS.sol.x);
+% catch
+%     warning('not successful')
+% end
 SolveOCP_WS = F_SolveOCP(BuildOCP_WS,OptsParams_WS,n,m);%,'casadi_options',casadi_options);
 PostProcessOCP_WS = G_PostProcessOCP2(SolveOCP_WS.sol,SingleShootIntEval_WS.X_mat,BuildOCP_WS,OptsParams_WS,n,m,SetupI_WS.M,SetupI_WS.N);%, ...
     %xy_corridor);
-echo off
+
 
 %% CT simulation ode45
 % struct2CallerWS(PostProcessOCP_WS)
@@ -68,6 +67,7 @@ end
 disp('------------------------------')
 disp('Video der Fahrt wird nun gerendert')
 disp('------------------------------')
+
 %% trajectory plots
 if trajectory_plots_on==1
     left_color  = [0 0 1];  %red
@@ -115,10 +115,17 @@ if trajectory_plots_on==1
         legend('$u_r$','$u_{\theta}$','Location','East')
 end
 
-
-
-
 %%
+%%
+if close_IG_fig==1
+    close(fig)
+else
+    figure(fig)
+    plot(x_traj_CT(1,:),x_traj_CT(2,:),'k-','Linewidth',2)
+    plot(x_traj(1,:),x_traj(2,:),'g--','Linewidth',2,'Marker','.','MarkerSize',20)
+    plot(x_traj(1,:),x_traj(2,:),'g','Linewidth',2,'Marker','o','MarkerSize',5,'Linestyle','none')
+end
+
 %% animation
 % clc
 % return
@@ -143,7 +150,7 @@ if animation_plots_on==1
         'FigPos',fig_pos,'Screen',screen,'FigTitle','Capture frames for video');
     jFrame = get(handle(fig_capture_frames), 'JavaFrame');
     jFrame.setMinimized(1);
-%     set(gcf,'WindowState','minimized')
+    %     set(gcf,'WindowState','minimized')
     p = panel();
     p.pack({1}, {2/3 []});
     p(1,2).pack(2,1);
@@ -195,12 +202,12 @@ if animation_plots_on==1
                max(y_lim_help)+add_space ])
 
     drawnow
-    state = 2;
     tgrid_x_CT_int = 0:h_int:t_f_opt;
     x_traj_CT_int  = interp1(tgrid_x_CT,x_traj_CT',tgrid_x_CT_int,'spline')';
     p(1,2,1,1).select();
         hold on
         plot(tgrid_x_CT_int,u_CT(tgrid_x_CT_int),'LineWidth',2)
+%         plot(tgrid_x_CT_int(1:end-1),diff(u_CT(tgrid_x_CT_int)),'LineWidth',2)
         set_limits_perc(u_CT(tgrid_x_CT_int),[8,8]);
 %         leg_121 = legend('$a$','$\omega$','Location','east');
         leg_121 = legend('Beschleunigung','Lenkwinkelgeschw.','Location','southeast');
@@ -216,21 +223,13 @@ if animation_plots_on==1
 
     t_plot    = 0;
     t_frames  = 0;
-    t_f_opt;
-    scalefps=true;
-    if (scalefps)
-     if (t_f_opt>7);
-    frameskips = round(1000+((t_f_opt-7)/5)*3000);
 
-    video_speed = t_f_opt/((length(tgrid_x_CT_int)/frameskips)+1);
-     end
-    end
     frame_numbers = [1:frameskips:length(tgrid_x_CT_int), length(tgrid_x_CT_int)];
 
     t_anim_0 = datevec(datetime('now'));
     f = waitbar(0,'Rendering Video');
 %     f.Position= [900.2500 624 547.5000 90.5000];
-    for jj=1:length(frame_numbers)
+for jj=1:length(frame_numbers)
         waitbar(jj/length(frame_numbers),f,'Rendering Video');
         ii = frame_numbers(jj);
         tic

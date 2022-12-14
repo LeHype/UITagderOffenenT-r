@@ -3,8 +3,8 @@ function varargout = MakeDefaultFig(width,height,add)
         % mandatory
             % nothing
         % optional 
-            width double = 30
-            height double = 60
+            width double  = 30
+            height double = 100
             add.FigTitle = []
             add.FigUnits  {mustBeMember(add.FigUnits, {'normalized','pixels'})} = 'normalized'
             add.DefaultAxesPosition double = [0.09, 0.1, 0.87, 0.84];
@@ -33,6 +33,9 @@ function varargout = MakeDefaultFig(width,height,add)
     
     if strcmp(FigUnits,'pixels')==1
         MonitorPositions = getScreenSize;
+        if size(MonitorPositions,1)==1
+            Screen = 1;
+        end
         width  = width/MonitorPositions(Screen,3)*100;
         height = height/MonitorPositions(Screen,4)*100;
     end
@@ -43,7 +46,7 @@ function varargout = MakeDefaultFig(width,height,add)
     drawnow 
 
     
-    if CallbackListenerFunOn==1
+    if CallbackListenerFunOn==1 && ~isempty(CallbackListenerFun)
         hold on
         cur_axes = gca;
         listeneeer = setCallbackListenerFun(fig,cur_axes,CallbackListenerFun);

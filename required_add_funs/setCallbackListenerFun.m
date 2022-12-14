@@ -17,7 +17,7 @@ function listeneeer = setCallbackListenerFun(cur_fig,cur_axes,listener_fun)
     listeneeer{1} = addlistener(string_props_array, 'String', 'PostSet', listener_fun);
     
     %% axes
-    if 0
+    if 1
         fns_axes = fieldnames(cur_axes);
         not_inds = [];
         excl_props = {'Position','CurrentPoint','TightInset','Children','Layout','Type','Legend','HandleVisibility'};

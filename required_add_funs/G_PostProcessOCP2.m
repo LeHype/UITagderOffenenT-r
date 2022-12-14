@@ -97,6 +97,11 @@ function WS_struct = G_PostProcessOCP2(sol,X_mat,BuildOCP_WS,OptsParams_WS,n,m,M
     x_traj = full(x_traj);
     x_fun = griddedInterpolant(tgrid_x,x_traj','linear');
 
+    t_grid = tgrid_x;
+
+    x_fun = @(t) x_fun(t)';
+    u_fun = @(t) u_fun(t)';
+
 
 %     MakeDefaultFig(100,100,'Screen',1)
 %     subplot(1,2,1)

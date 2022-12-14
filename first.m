@@ -18,28 +18,23 @@ echo off
 mfile_name    = mfilename('fullpath');
 [pathstr,~,~] = fileparts(mfile_name);
 cd(pathstr);
-% clearvars
-addpath('./required_add_funs')
+clearvars
+addpath('.\required_add_funs')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-global state 
-state = 1;
+
 
 %%
 % clear all
-% close all
-% clc
+close all
+clc
 % clearvars -except xy_GI_ed xy_I1
 
 import casadi.*
 
 screen = 2;
 fig_height = 100;
-fig_width  = 55;
-fig_pos    = 'middle-right';
-% fig_pos = [Position(1) Position(2)];
-% fig_height = Position(4);
-% fig_width = Position(3);
-
+fig_width  = 60;
+fig_pos    = 'middle-left';
 
 fontsize = 18;
 SetDefaultProperties("Fontsize",fontsize)
@@ -119,8 +114,7 @@ ub_a   = 5;
     [car,car_colors,indiv_part,circles,body_center] = create_car_object('blue');
     car_now = rot_transl_object(car,psi_0-pi/2,'rad',xy_0',body_center,indiv_part);
 
-     fig = MakeDefaultFig(fig_width,fig_height,'Screen',screen,'FigPos',fig_pos,'FigTitle','Draw initial guess');
-%     fig = app.UIAxes ;
+    fig = MakeDefaultFig(fig_width,fig_height,'Screen',screen,'FigPos',fig_pos,'FigTitle','Draw initial guess');
     hold on
     patch_object(car_now,car_colors,1);
     my_rectangle(xy_f'-0.5,xy_f'+0.5);
@@ -176,7 +170,7 @@ ub_a   = 5;
     OptsParams.option_set      = 1;
     OptsParams.t_grid_normed_opt = 1;
     OptsParams.casadi_options = [];
-% solver optionxs                       
+% solver options                       
     OptsParams.solver_choice  = 'ipopt'; %'ipopt','worhp'
     OptsParams.solver_options = ipopt_options; 
 % integrator choice + cost functional
@@ -279,7 +273,7 @@ ub_a   = 5;
 
 % PATH FOLLOWING
     % path-state dynamics
-        QuantsOCP.rhs_path = @(t,theta,v) [50*theta(1) + v(1),-10*theta(2) + v(2)]; 
+        QuantsOCP.rhs_path = @(t,theta,v) [50*theta(1) + v(1);-10*theta(2) + v(2)]; 
         QuantsOCP.n_p = 2;
         QuantsOCP.m_p = 2;
         QuantsOCP.xy_corridor = 'see below';
@@ -307,7 +301,8 @@ end
     if IG_on==1
         [xy_GI_ed,xy_I1,t_grid_ed_eval] = InitialGuessXY(xy_0,xy_f,'N',SetupI_WS.N,'interp_method',interp_method);
     end
-    [xy_corridor,~,alpha_GI_ed] = xyCorridorParam(xy_I1,t_grid_ed_eval,interp_method);
+%     [xy_corridor,~,alpha_GI_ed] = xyCorridorParam(xy_I1,t_grid_ed_eval,interp_method);
+    [xy_corridor,~,alpha_GI_ed] = xyCorridorParamNew(xy_I1,t_grid_ed_eval,interp_method);
     plotCorridor(xy_corridor,max_abs_theta_2)
     axes = gca;
     axes.Color = gray_bg_color;
@@ -320,8 +315,8 @@ end
 %     SetupI_WS.x_guess_norm_fun = @(t,x_0,x_f) [xy_GI_ed(t)'; x_0(3:n) + (x_f(3:n)-x_0(3:n))*t];
     SetupI_WS.x_guess_norm_fun = @(t,x_0,x_f) [xy_GI_ed(t)'; ub_v; -pi/2-alpha_GI_ed(t); 0];
 %     SetupI_WS.x_guess_norm_fun = @(t,x_0,x_f) [xy_GI_ed(-1+t)'; ub_v; -pi/2-alpha_GI_ed(-1+t); 0];
-echo on
-% fig(close);
+
+
 save('Workspace.mat')
 clear all
 close all

@@ -1,4 +1,10 @@
 function create_MatlabCasadi_sym(MatOrCas,var_texts,workspace_name,Casadi_var_type)
+    arguments
+        MatOrCas        {mustBeMember(MatOrCas,{'Matlab','Casadi'})}
+        var_texts       cell
+        workspace_name  {mustBeMember(workspace_name,{'caller','base'})} = 'caller'
+        Casadi_var_type {mustBeMember(Casadi_var_type,{'SX','MX'})} = 'SX'
+    end
     % example calls:
     %   create_MatlabCasadi_sym('Matlab',{'t','h','x_0 5 1','x_1 5 1','u_0','u_1'},'caller')
     %   create_MatlabCasadi_sym('Casadi',{'t','h','x_0 5 1','x_1 5 1','u_0','u_1'},'MX')
@@ -31,11 +37,6 @@ function create_MatlabCasadi_sym(MatOrCas,var_texts,workspace_name,Casadi_var_ty
                 evalc([code_1,code_2,code_real,code_3]);
             end
         elseif Casadi_var==1
-            if nargin<=3
-                Casadi_var_type = 'SX';
-            elseif strcmp(Casadi_var_type,{'MX','SX'})~=1
-                error([Casadi_var_type,' is not a valid Casadi variable type.'])
-            end
             code = [code_1,Casadi_var_type,'.',code_2,code_3];
             try
                 evalc(code);
@@ -45,9 +46,6 @@ function create_MatlabCasadi_sym(MatOrCas,var_texts,workspace_name,Casadi_var_ty
             end
         else
             error('Choose between "Matlab" and "Casadi".')
-        end
-        if nargin<=2 || isempty(workspace_name)
-            workspace_name = 'base';
         end
             
         % assign variables to base workspace
