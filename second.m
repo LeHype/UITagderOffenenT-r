@@ -1,4 +1,4 @@
-function [] = second()
+function [] = second(name)
 warning('off','all');
 echo off
 load("Workspace.mat");
@@ -127,216 +127,54 @@ else
 end
 
 %% animation
-% clc
-% return
+
 % x_traj_CT_GI  = griddedInterpolant(tgrid_x_CT,x_traj_CT','spline');
 % optSol = var2struct(x_traj_CT_GI,t_f_opt);
 
-window_size = window_size_coeff*t_f_opt;
 
-car_colors_opt = car_colors;
-car_colors_opt(1:2) = {[0 1 0],[0 1 0]};
 if animation_plots_on==1    
-    x_0_guess = full(SolveOCP_WS.sol.x);
-    if avoid_objects==1
-        x_lim_help = [x_traj_CT(1,:),x_0_guess(1,:),objects_circle_midpoint(1,:)];
-        y_lim_help = [x_traj_CT(2,:),x_0_guess(2,:),objects_circle_midpoint(2,:)];
-    else
-        x_lim_help = [x_traj_CT(1,:),x_0_guess(1,:)];
-        y_lim_help = [x_traj_CT(2,:),x_0_guess(2,:)];
-    end
+    carHeight = 0.5;
+    [dims,coords] = create3DCarObjectTdoT(1.8,90,'BodyHeight',carHeight,'BodyWidth',1,'FrontLength',0.5,'TireRadius',0.2,'TireWidth',0.1);
+    coords.YellowCylinder = CoordsCylinder(0.1,carHeight,11,'Translation',[0 0 carHeight/2]');
+    
+    tgrid_x_int = 0:h_int:tgrid_x(end);
+    
+    x_fun_help = griddedInterpolant(tgrid_x,x_traj','spline');
+    x_fun   = @(t) x_fun_help(t)';
+    phi_fun = computeTireAngleFun(x_fun,tgrid_x_int);
+    
+    x_fun_opt   = @(t) optSol.x_traj_CT_GI(min(t,optSol.t_f_opt))';
+    phi_fun_opt = computeTireAngleFun(x_fun_opt,0:h_int:optSol.t_f_opt);
 
-    fig_capture_frames = MakeDefaultFig(fig_width,fig_height,'CallbackListenerFunOn',0, ...
-        'FigPos',fig_pos,'Screen',screen,'FigTitle','Capture frames for video');
-    jFrame = get(handle(fig_capture_frames), 'JavaFrame');
-    jFrame.setMinimized(1);
-    %     set(gcf,'WindowState','minimized')
-    p = panel();
-    p.pack({1}, {2/3 []});
-    p(1,2).pack(2,1);
-%         height_p12 = 1/2+0.05;
-%         p(1,2).pack({height_p12/2 height_p12/2}, {1});
-    p.select('all');
-    p.margin = 15;
-    p.margintop = 8;
-    p.marginbottom = 20;
-    p.marginleft = 18;
-    p(1,2,1).marginbottom = 5;
-    p(1,1).marginright = 27;
-    p(1,2,1,1).select();
-%         ylabel('input $u$')
-        ylabel('Eingangsgr{\"o}{\ss}en')
-        set(gca, 'xtick', []);
-    p(1,2,2,1).select();
-%         xlabel('time $t$ in seconds')
-%         ylabel('parts of the state $x$')
-        xlabel('Zeit $t$ in Sekunden')
-        ylabel('Fahrzeugzust{\"a}nde')
-        xticks(0:xticks_h:t_f_opt)
-    p(1,1).select();
-%         xlabel('$x$-position')
-%         ylabel('$y$-position')
-        xlabel('Position in $x$-Richtung')
-        ylabel('Position in $y$-Richtung')
-        hold on
-        my_rectangle(SetupII_WS.lb_x_f([1,2]),SetupII_WS.ub_x_f([1,2]));
-        add_space = 1.5;
-        axis equal
-        set(gca,'Color',gray_bg_color)
-        plotCorridor(xy_corridor,max_abs_theta_2)
-        plot(x_traj_CT(1,:),x_traj_CT(2,:),'k-','Linewidth',2)
-%         plot(x_traj(1,:),x_traj(2,:),'mo','Linewidth',2,'LineStyle','none')
-        scatter(x_traj(1,:),x_traj(2,:),'MarkerFaceColor','none', ...
-            'MarkerEdgeColor',0.5*[1 1 1],'MarkerEdgeAlpha',0.8)
-        plot(x_0_guess(1,:),x_0_guess(2,:),'k--')  
-        if avoid_objects==1
-            for oo=1:length(objects_cirlce_radius)
-    %             circle(objects_circle_midpoint(:,oo),2*objects_cirlce_radius(oo),'red');
-    %             all_circles(oo) = 
-                circle3(objects_circle_midpoint(:,oo),2*objects_cirlce_radius(oo),'FaceColor','red','FaceAlpha',1);
-            end
-        end
-        xlim([ min(x_lim_help)-add_space,...
-               max(x_lim_help)+add_space ])
-        ylim([ min(y_lim_help)-add_space,...
-               max(y_lim_help)+add_space ])
+    
+    obstacles.radius   = objects_cirlce_radius;
+    obstacles.midpoint = objects_circle_midpoint;
 
-    drawnow
-    tgrid_x_CT_int = 0:h_int:t_f_opt;
-    x_traj_CT_int  = interp1(tgrid_x_CT,x_traj_CT',tgrid_x_CT_int,'spline')';
-    p(1,2,1,1).select();
-        hold on
-        plot(tgrid_x_CT_int,u_CT(tgrid_x_CT_int),'LineWidth',2)
-%         plot(tgrid_x_CT_int(1:end-1),diff(u_CT(tgrid_x_CT_int)),'LineWidth',2)
-        set_limits_perc(u_CT(tgrid_x_CT_int),[8,8]);
-%         leg_121 = legend('$a$','$\omega$','Location','east');
-        leg_121 = legend('Beschleunigung','Lenkwinkelgeschw.','Location','southeast');
-        setLegColorAlpha(leg_121,[1 1 1],0.7)
-    p(1,2,2,1).select();
-        hold on
-        plot(tgrid_x_CT_int,x_traj_CT_int(3:end,:),'LineWidth',2)
-        set_limits_perc(x_traj_CT_int(3:end,:),[8,8]);
-        leg_122 = legend('Geschwindigkeit','Fahrzeugwinkel (rad)','Radwinkel (rad)','Location','east');
-        setLegColorAlpha(leg_122,[1 1 1],0.7)
-%         [car,car_colors,indiv_part,circles,body_center] = create_car_object;
-    clearvars alpha frames frames_opt
 
-    t_plot    = 0;
-    t_frames  = 0;
+    figureData.screen = 2;
+    figureData.height = 100;
+    figureData.width = 60;
+    figureData.position = 'middle-left';
+    figureData.backgrColor = [0.9000 0.9000 0.9000];
+    figureData.fontsize = 18;
+    figureData.xticks_h = 0.5000;
 
-    frame_numbers = [1:frameskips:length(tgrid_x_CT_int), length(tgrid_x_CT_int)];
 
-    t_anim_0 = datevec(datetime('now'));
-    f = waitbar(0,'Rendering Video');
-%     f.Position= [900.2500 624 547.5000 90.5000];
-for jj=1:length(frame_numbers)
-        waitbar(jj/length(frame_numbers),f,'Rendering Video');
-        ii = frame_numbers(jj);
-        tic
-        p(1,1).select();
-            x_i = x_traj_CT_int(:,ii);
-            indiv_part.angle = x_i(5)*ones(1,2); 
-            car_now = rot_transl_object(car,x_i(4)-pi/2,'rad',x_i([1,2]),body_center,indiv_part);
-            all_car_patches = patch_object(car_now,car_colors,0.65);
-            dot = plot(x_i(1),x_i(2),'yo','Linewidth',3);    
-            for rr=1:length(car_cirlce_radius)
-                car_circle_midpoint_now = x_i(1:2)+rot_z(car_circle_midpoint(:,rr),x_i(4)-pi/2,'rad');
-                car_circles_now(rr) = circle2(car_circle_midpoint_now,2*car_cirlce_radius(rr),'k');                    
-            end
-
-            if ii~=frame_numbers(end)
-                title(sprintf('t = %0.2f sek',tgrid_x_CT_int(ii)),'interpreter','none')
-            else
-                title(sprintf('t = %0.5f sek',tgrid_x_CT_int(ii)),'interpreter','none')
-%                 title(sprintf('$t = %0.5f \\ \\mathrm{sek}$',tgrid_x_CT_int(ii)),'interpreter','tex')
-%                 title(sprintf('$t = %0.5f \\ \\mathrm{sek}$',tgrid_x_CT_int(ii)),'interpreter','tex')
-            end
-        
-        p(1,2,1,1).select();
-            xlim([max(0, tgrid_x_CT_int(ii)-window_size/2), min(tgrid_x_CT_int(ii)+window_size/2, tgrid_x_CT_int(end))])
-            dots_1 = plot(tgrid_x_CT_int(ii),u_CT(tgrid_x_CT_int(ii)),'k-o','LineWidth',2);
-        p(1,2,2,1).select();
-            xlim([max(0, tgrid_x_CT_int(ii)-window_size/2), min(tgrid_x_CT_int(ii)+window_size/2, tgrid_x_CT_int(end))])
-            dots_2 = plot(tgrid_x_CT_int(ii),x_traj_CT_int(3:end,ii),'k-o','LineWidth',2);
-        drawnow
-        t_plot = t_plot+toc;
-
-        tic
-        if 0%jj>1 && plot_car_opt==1 && t_now>optSol.t_f_opt
-            for mm=1:length(all_car_patches_opt)
-                all_car_patches_opt(mm).Visible = 'off';
-            end
-        end
-        cur_frame = getframe(gcf);
-        if 0%jj>1 && plot_car_opt==1 && t_now>optSol.t_f_opt
-            for mm=1:length(all_car_patches_opt)
-                all_car_patches_opt(mm).Visible = 'on';
-            end
-        end
-        frames(jj) = cur_frame;
-        t_frames = t_frames + toc;
-
-        t_now = tgrid_x_CT_int(ii);
-        if plot_car_opt==1 
-            if 1%t_now<=optSol.t_f_opt
-                p(1,1).select();
-                if t_now<=optSol.t_f_opt
-                    t_eval = t_now;
-                else
-                    t_eval = optSol.t_f_opt;
-                end
-                x_i = optSol.x_traj_CT_GI(t_eval)';
-                indiv_part.angle = x_i(5)*ones(1,2); 
-                car_now = rot_transl_object(car,x_i(4)-pi/2,'rad',x_i([1,2]),body_center,indiv_part);
-                all_car_patches_opt = patch_object(car_now,car_colors_opt,0.2);
-            end
-            cur_frame = getframe(gcf);
-            frames_opt(jj) = cur_frame;
-        end
-
-        if jj<length(frame_numbers)
-            delete(all_car_patches);
-            delete(dot)
-            delete(dots_1)
-            delete(dots_2)
-            delete(car_circles_now)
-            t_next = tgrid_x_CT_int(frame_numbers(jj+1));
-            if 1%plot_car_opt==1 &&  t_next<=optSol.t_f_opt
-                delete(all_car_patches_opt)
-            end
-        end
-    end
-    t_anim_f = datevec(datetime('now'));
-    t_anim   = etime(t_anim_f,t_anim_0);
-    [t_anim_h,t_anim_m,t_anim_s] = hms(seconds(t_anim));
-%     fprintf('Animation took %0.1fsec\n',t_anim_s)
+    VideoSpeed = 0.75;
+    VideoTitle = [num2str(t_f_opt),'_s_Fahrtzeit_',name];
+    [vidObj,t_grid_video,VideoFPS_actual] = prepareVideoObj(tgrid_x,'VideoFPS',12,'VideoSpeed',VideoSpeed, ...
+        'VideoFormat','MPEG-4','VideoTitle',VideoTitle);
+    frames_opt = animate3DCarTdoT(dims,coords,obstacles,figureData,SetupII_WS,SolveOCP_WS, ...
+        t_grid_video,tgrid_x_int,x_fun,x_fun_opt,u_CT,phi_fun,phi_fun_opt,xy_corridor,max_abs_theta_2,'CaptureFrames',1);
 
     PrintFig('final_frame','FileFormat','pdf')
     if close_capture_fig==1
-        close(fig_capture_frames)
+        close(gcf)
     end
 
-     name_person = 'Markus';
-     video_title = [sprintf('%0.5fs',t_f_opt),'_',name_person,'_at_',datestr(now,'hhMM')];
-    if PathFollowing==1
-        video_title = [video_title,'_PF'];
-    end
-
-%     fig_video = MakeDefaultFig(fig_width,fig_height,'CallbackListenerFunOn',0,'Screen',screen,'FigTitle','Video','FigPos',fig_pos);
-%     set(gcf,'DefaultAxesPosition',[0 0 1 1])
-%     movie(frames,1,round(video_speed*fps))
-%     movie(frames_opt,1,round(video_speed*fps))
-%     if close_video_fig==1
-%         close(fig_video)
-%     end
-    if make_video_on==1
-        framerate = ceil(video_speed*fps);
-        make_video([frames,repmat(frames(end),1,framerate+1)],framerate,video_title);
-    end
 end
 
-close(f);
-save('Workspace.mat','fig_height','fig_width','fig_pos','frames_opt','video_speed','fps','screen','t_f_opt');
+save('Workspace.mat','figureData','frames_opt','vidObj','VideoFPS_actual','VideoSpeed','t_f_opt');
 
 clear all
 close all
