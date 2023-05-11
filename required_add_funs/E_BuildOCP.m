@@ -547,7 +547,7 @@ function WS_struct = E_BuildOCP(SingleShootIntEval_WS,OptsParams_WS,SetupI_WS,Se
 
 
     %% cost functional
-    J_L_fun = Function('J_L_fun',{w,w_L},{J_L});
+    % J_L_fun = Function('J_L_fun',{w,w_L},{J_L});
     J_t     = w_t_f*t_f;
 %     J_Phi   = Phi.Cfun(N_sym*h,X_last_right,U_last_right,w_Phi);
         J_Phi   = 0*t_f;%Phi.Cfun(t_f,X_last_right,U_last_right,w_Phi);
