@@ -33,7 +33,7 @@ import casadi.*
 
 screen = 2;
 fig_height = 100;
-fig_width  = 60;
+fig_width  = 90.5;
 fig_pos    = 'middle-right';
 
 fontsize = 18;
@@ -316,10 +316,9 @@ end
     SetupI_WS.x_guess_norm_fun = @(t,x_0,x_f) [xy_GI_ed(t)'; ub_v; -pi/2-alpha_GI_ed(t); 0];
 %     SetupI_WS.x_guess_norm_fun = @(t,x_0,x_f) [xy_GI_ed(-1+t)'; ub_v; -pi/2-alpha_GI_ed(-1+t); 0];
 
-
+close all
 save('Workspace.mat')
 clear all
-close all
 clc
 end
 

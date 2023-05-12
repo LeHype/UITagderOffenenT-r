@@ -44,8 +44,8 @@ y_lim_help = [x_traj(2,:),x_0_guess(2,:),obstacles.midpoint(2,:)];
 
 fig_capture_frames = MakeDefaultFig(figureData.width,figureData.height,'CallbackListenerFunOn',0, ...
     'FigPos',figureData.position,'Screen',figureData.screen,'FigTitle',VideoTitle);
-% jFrame = get(handle(fig_capture_frames), 'JavaFrame');
-% jFrame.setMinimized(1);
+jFrame = get(handle(fig_capture_frames), 'JavaFrame');
+jFrame.setMinimized(1);
 
 p = panel();
 p.pack({1}, {2/3 []});

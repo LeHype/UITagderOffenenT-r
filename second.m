@@ -4,7 +4,7 @@ echo off
 load("Workspace.mat");
 addpath('.\required_add_funs');
 
-disp('initialisiere Optimizer');
+disp('Initialisiere Solver: Optimierung wird gestartet');
 %SECOND Summary of this function goes here
 %   Detailed explanation goes here
 %% SetupII, SingleShootIntEval & BuildOCP 
@@ -153,8 +153,8 @@ if animation_plots_on==1
 
     figureData.screen = 2;
     figureData.height = 100;
-    figureData.width = 60;
-    figureData.position = 'middle-left';
+    figureData.width = 90.5;
+    figureData.position = 'middle-right';
     figureData.backgrColor = [0.9000 0.9000 0.9000];
     figureData.fontsize = 18;
     figureData.xticks_h = 0.5000;
@@ -174,7 +174,7 @@ if animation_plots_on==1
 
 end
 
-save('Workspace.mat','figureData','frames_opt','vidObj','VideoFPS_actual','VideoSpeed','t_f_opt');
+save('Workspace.mat','figureData','frames_opt','vidObj','VideoFPS_actual','VideoSpeed');
 
 clear all
 close all
