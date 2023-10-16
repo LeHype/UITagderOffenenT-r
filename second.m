@@ -1,4 +1,5 @@
-function [] = second(name)
+function problemInfeasible = second(name)
+stopWhenInfeasible = 1;
 warning('off','all');
 echo off
 load("Workspace.mat");
@@ -42,27 +43,30 @@ if sim_CT==1
     x_traj_CT = x_traj_CT';
 end
 
-if SolveOCP_WS.solver.stats.success;
-disp('------------------------------')
-    disp('Optimieren erfolgreich');
-disp('------------------------------')
+if SolveOCP_WS.solver.stats.success==1
+    disp('------------------------------')
+        disp('Optimieren erfolgreich');
+    disp('------------------------------')
+    problemInfeasible = 0;
 else 
     warning('on','all');
     warning('Optimieren Fehlgeschlagen! ')
     warning('off','all');
-% disp('Optimieren Fehlgeschlagen! ')
-disp('Dies kann merere Gründe haben.')
-disp('  1. Der gezeichnete Pfad physikalisch ist nicht fahrbar.')
-disp('     Habt ihr eventuell zu steile Kurven eingebaut? Und denkt ihr')
-disp('     dass ein echtes Auto diesen Pfand fahren könnte?')
-disp('  2. Der Optimizer ist in ein sog. lokales Minimum gelaufen.')
-disp('     Sollte dies der Fall sein kann durch Anpassung des  ')
-disp('     Algorythmus meistens die Lösung noch gefunden werden.')
-disp('  3. Die maximale Fahrtzeit von 12 Sekunden wurde überschritten.')
-disp('     Falls ihr einen besonders langen Pfad ohne zu steile Kuven ')
-disp('     ausgewählt habt ist dies wahrscheinlich der Grund.')
-disp('  4. Falls ihr euch immernoch nicht sicher seit was fehlgeschlagen ist')
-disp('     fragt gerne eine Person vom Lehrstuhl.')
+    % disp('Optimieren Fehlgeschlagen! ')
+    disp('Dies kann merere Gründe haben.')
+    disp('  1. Der gezeichnete Pfad physikalisch ist nicht fahrbar.')
+    disp('     Habt ihr eventuell zu steile Kurven eingebaut? Und denkt ihr,')
+    disp('     dass ein echtes Auto diesen Pfad fahren könnte?')
+    disp('  2. Die maximale Fahrtzeit von 12 Sekunden wurde überschritten.')
+    disp('     Falls ihr einen besonders langen Pfad ohne zu steile Kurven ')
+    disp('     ausgewählt habt, ist dies wahrscheinlich der Grund.')
+    disp('  3. Falls ihr euch immernoch nicht sicher seit was fehlgeschlagen ist')
+    disp('     fragt gerne eine Person vom Lehrstuhl.')
+
+    if stopWhenInfeasible==1
+        problemInfeasible = 1;
+    end
+    return
 end
 disp('------------------------------')
 disp('Video der Fahrt wird nun gerendert')
@@ -176,7 +180,6 @@ end
 
 save('Workspace.mat','figureData','frames_opt','vidObj','VideoFPS_actual','VideoSpeed');
 
-clear all
 close all
 
 
@@ -185,3 +188,4 @@ end
 function dx = eval_rhs(t,x,u,rhs)
     dx = rhs(t,x,u(t)');
 end
+
